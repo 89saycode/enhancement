@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>商品展示</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #e8e8e8;
+      }
+
+      .search {
+        /* width: 100%; */
+        padding: 10px;
+        position: relative;
+      }
+
+      .search input {
+        width: 100%;
+        height: 30px;
+        border: none;
+        border-radius: 50px;
+        padding: 0 10px;
+      }
+
+      .search .search-btn {
+        width: 25px;
+        height: 25px;
+        background: #e50040;
+        position: absolute;
+        right: 15px;
+        top: 12.5px;
+        border-radius: 50%;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .category {
+        padding: 0 10px;
+      }
+
+      .category button {
+        margin-right: 10px;
+        padding: 5px;
+        font-size: 14px;
+        border: none;
+        border-bottom: 2px solid #e8e8e8;
+        background: none;
+      }
+
+      button.active {
+        border-bottom: 3px solid #e50040;
+      }
+
+      .product {
+        display: inline-block;
+        width: calc(50% - 20px);
+        height: 215px;
+        margin: 10px;
+        padding: 15px;
+        text-align: center;
+        background: #ffffff;
+        border-radius: 10px;
+      }
+
+      .product img {
+        width: 118px;
+        height: 155px;
+        max-height: 200px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .product p {
+        margin-top: 5px;
+        font-size: 16px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+
+      .modal img {
+        max-width: 90%;
+        max-height: 90%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="search">
+        <input placeholder="请输入搜索条件" />
+        <div class="search-btn"></div>
+      </div>
+      <div class="category">
+        <button id="all-btn" class="category-item" onclick="toggleActive(this)">全部</button>
+        <button id="beauty-btn" class="category-item" onclick="toggleActive(this)">美甲</button>
+        <button id="eyelashes-btn" class="category-item" onclick="toggleActive(this)">美睫</button>
+        <button id="haircut-btn" class="category-item" onclick="toggleActive(this)">理发</button>
+        <button id="perm-btn" class="category-item" onclick="toggleActive(this)">烫发</button>
+        <!-- 添加其他分类按钮 -->
+      </div>
+
+      <div id="product-container"></div>
+
+      <div class="modal" id="modal">
+        <img id="modal-image" />
+      </div>
+    </div>
+
+    <script>
+      // 商品数据
+      const products = [
+        {
+          id: 1,
+          name: "",
+          category: "全部",
+          image: "image/1.jpeg",
+        },
+        {
+          id: 2,
+          name: "",
+          category: "美甲",
+          image: "image/2.jpeg",
+        },
+        {
+          id: 3,
+          name: "",
+          category: "美甲",
+          image: "image/3.jpeg",
+        },
+        {
+          id: 4,
+          name: "",
+          category: "美甲",
+          image: "image/4.jpeg",
+        },
+        {
+          id: 5,
+          name: "",
+          category: "美甲",
+          image: "image/5.jpeg",
+        },
+        {
+          id: 6,
+          name: "",
+          category: "美甲",
+          image: "image/6.jpeg",
+        },
+        {
+          id: 7,
+          name: "",
+          category: "美甲",
+          image: "image/7.jpeg",
+        },
+        {
+          id: 8,
+          name: "",
+          category: "美甲",
+          image: "image/8.jpeg",
+        },
+        {
+          id: 9,
+          name: "",
+          category: "美甲",
+          image: "image/9.jpeg",
+        },
+        {
+          id: 10,
+          name: "",
+          category: "美甲",
+          image: "image/10.jpeg",
+        },
+        {
+          id: 11,
+          name: "",
+          category: "美甲",
+          image: "image/11.jpeg",
+        },
+        {
+          id: 12,
+          name: "",
+          category: "美甲",
+          image: "image/12.jpeg",
+        },
+        {
+          id: 13,
+          name: "",
+          category: "美甲",
+          image: "image/13.jpeg",
+        },
+        {
+          id: 14,
+          name: "",
+          category: "美甲",
+          image: "image/14.jpeg",
+        },
+      ];
+
+      // 初始化页面内容
+      function initProducts(productsData) {
+        var container = document.getElementById("product-container");
+        container.innerHTML = "";
+
+        productsData.forEach(function (product) {
+          var productDiv = document.createElement("div");
+          productDiv.className = "product";
+
+          var img = document.createElement("img");
+          img.src = product.image;
+          img.alt = product.name;
+
+          var name = document.createElement("p");
+          name.textContent = product.name;
+
+          productDiv.appendChild(img);
+          productDiv.appendChild(name);
+          container.appendChild(productDiv);
+
+          // 图片点击事件
+          img.addEventListener("click", function () {
+            showModal(product.image);
+          });
+        });
+      }
+
+      // 弹出放大图片的模态框
+      function showModal(image) {
+        var modal = document.getElementById("modal");
+        var modalImage = document.getElementById("modal-image");
+
+        modalImage.src = image;
+        modal.style.display = "block";
+
+        // 点击模态框关闭
+        modal.addEventListener("click", function () {
+          modal.style.display = "none";
+        });
+      }
+
+      // 分类按钮点击事件
+      function onCategoryClick(category) {
+        var filteredProducts = products.filter(function (product) {
+          return product.category === category || category === "全部";
+        });
+
+        initProducts(filteredProducts);
+      }
+
+      function toggleActive(element) {
+        // 移除所有分类标题的 active 类
+        var categoryItems = document.getElementsByClassName("category-item");
+        console.log(categoryItems);
+        for (var i = 0; i < categoryItems.length; i++) {
+          categoryItems[i].classList.remove("active");
+        }
+
+        // 将被点击的分类标题添加 active 类
+        element.classList.add("active");
+      }
+
+      // 初始化页面
+      function initPage() {
+        initProducts(products);
+
+        var allBtn = document.getElementById("all-btn");
+        var beautyBtn = document.getElementById("beauty-btn");
+        var eyelashesBtn = document.getElementById("eyelashes-btn");
+        var haircutBtn = document.getElementById("haircut-btn");
+        var permBtn = document.getElementById("perm-btn");
+
+        // 初始化点击全部按钮
+        allBtn.classList.add("active");
+        // 获取其他分类按钮
+
+        allBtn.addEventListener("click", function () {
+          onCategoryClick("全部");
+        });
+
+        beautyBtn.addEventListener("click", function () {
+          onCategoryClick("美甲");
+        });
+
+        eyelashesBtn.addEventListener("click", function () {
+          onCategoryClick("美睫");
+        });
+
+        haircutBtn.addEventListener("click", function () {
+          onCategoryClick("理发");
+        });
+
+        permBtn.addEventListener("click", function () {
+          onCategoryClick("烫发");
+        });
+        // 绑定其他分类按钮的点击事件
+      }
+
+      initPage();
+    </script>
+  </body>
+</html>
